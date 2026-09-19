@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JEV · SHAPES</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#0b0d10;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  #app{display:flex;height:100vh}
+  #left{position:relative;width:52%;overflow:hidden}
+  #char{width:100%;height:100%;display:block}
+  #emobox{
+    position:absolute;top:26px;left:26px;min-width:190px;padding:10px 16px 12px;
+    background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+    color:#fff;backdrop-filter:blur(4px);
+  }
+  #emobox .lab{font-size:10px;letter-spacing:2px;color:#b9bec6;font-weight:700}
+  #emobox .row{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+  #emobox .dot{width:9px;height:9px;border-radius:50%;background:#4caf7d;display:inline-block}
+  #emobox .nm{font-size:26px;font-weight:800}
+  #emobox .pc{margin-left:auto;font-size:13px;font-weight:700;color:#d7dae0}
+  #emobox .tr{height:5px;background:rgba(255,255,255,.16);border-radius:3px;margin-top:6px;overflow:hidden}
+  #emobox .fl{height:100%;width:0%;background:#4caf7d;border-radius:3px;transition:width .3s}
+  #chat{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:26px;width:78%;
+    display:flex;gap:10px;align-items:center;
+  }
+  #msg{
+    flex:1;padding:15px 20px;border-radius:12px;border:1px solid rgba(255,255,255,.22);
+    background:rgba(14,14,18,.78);color:#fff;font-size:15px;backdrop-filter:blur(4px);
+  }
+  #msg:focus{outline:2px solid #6fa8dc}
+  #msg::placeholder{color:#9aa1ab}
+  #send{padding:14px 22px;border-radius:12px;border:0;background:#e8f0f7;color:#0b0d10;font-weight:800;cursor:pointer;font-size:14px}
+  #right{width:48%;background:#0b0d10;color:#c9d1d9;padding:26px 30px;overflow:hidden;font-size:13px}
+  #right .hd{font-size:14px;font-weight:700;letter-spacing:.4px}
+  #right .hd .b{color:#7cb3e8}
+  #quoted{font-style:italic;font-size:19px;color:#eef1f4;margin:6px 0 14px;font-family:Georgia,serif}
+  .cf{font-size:13.5px;font-weight:700;color:#e6eaee;margin-bottom:8px}
+  .cf span{color:#8b949e;font-weight:400}
+  #blend{display:grid;grid-template-columns:1fr 1fr;gap:2px 26px;margin-bottom:6px}
+  .bsrow{display:flex;align-items:center;gap:8px}
+  .bsrow .nm{width:108px;color:#aab2ba;font-size:12px}
+  .bsrow .tr{flex:1;height:6px;background:#23272d;border-radius:3px;overflow:hidden}
+  .bsrow .fl{display:block;height:100%;width:0%;background:#5fbf77}
+  .bsrow .vv{width:34px;text-align:right;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#dfe4e9}
+  #tele{color:#8b949e;font-size:11.5px;margin:6px 0 12px}
+  .rrow{display:flex;align-items:baseline;margin:9px 0 3px}
+  .rrow .rn{width:96px;color:#e6eaee;font-weight:700;font-size:13px}
+  .rrow .rv{color:#e6eaee;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+  .rrow .rv .ro{color:#8b949e;font-size:11px}
+  .cats{display:grid;grid-template-columns:1fr 1fr;gap:1px 18px;padding-left:96px}
+  .cats span{color:#7d858e;font-size:11.5px;padding:1px 4px;border-radius:3px;display:flex;align-items:center;gap:5px}
+  .cats span i{width:8px;height:8px;border-radius:2px;display:inline-block;opacity:.5}
+  .cats span.on{background:#e8edf2;color:#111417;font-weight:700}
+  .cats span.on i{opacity:1}
+  #foot{margin-top:14px;color:#5c646c;font-size:11px;border-top:1px solid #1d2126;padding-top:10px}
+
+  @media (max-width:700px){
+    html,body{height:auto;min-height:100%;overflow:auto}
+    #app{display:block;height:auto;min-height:100vh}
+    #left{width:100%;height:100svh;min-height:620px}
+    #right{width:100%;height:auto;min-height:100svh;padding:24px 20px;overflow:visible}
+    #chat{width:calc(100% - 32px);bottom:18px}
+    #msg{min-width:0;padding:13px 14px}
+    #send{padding:13px 16px}
+    #emobox{top:18px;left:18px;min-width:170px}
+    #blend{grid-template-columns:1fr;gap:3px}
+    .cats{padding-left:0;margin-left:0;grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="left">
+    <svg id="char" viewBox="0 0 640 860" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop id="skyA" offset="0" stop-color="#7db4e8"/>
+          <stop id="skyB" offset="1" stop-color="#d9ecf9"/>
+        </linearGradient>
+        <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fdfcf6"/>
+          <stop offset="1" stop-color="#ebe8da"/>
+        </linearGradient>
+        <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+        <clipPath id="eyeLClip"><ellipse cx="262" cy="420" rx="30" ry="26"/></clipPath>
+        <clipPath id="eyeRClip"><ellipse cx="358" cy="420" rx="30" ry="26"/></clipPath>
+      </defs>
+      <rect width="640" height="860" fill="url(#sky)"/>
+      <g id="clouds" filter="url(#soft)" fill="#ffffff" opacity=".92">
+        <g class="cloud"><ellipse cx="120" cy="110" rx="90" ry="32"/><ellipse cx="190" cy="92" rx="70" ry="28"/><ellipse cx="70" cy="130" rx="60" ry="22"/></g>
+        <g class="cloud"><ellipse cx="520" cy="190" rx="100" ry="34"/><ellipse cx="590" cy="170" rx="60" ry="24"/></g>
+        <g class="cloud"><ellipse cx="80" cy="760" rx="110" ry="38"/><ellipse cx="170" cy="780" rx="70" ry="24"/></g>
+        <g class="cloud"><ellipse cx="550" cy="720" rx="90" ry="30"/><ellipse cx="490" cy="750" rx="60" ry="20"/></g>
+      </g>
+      <g id="sparkles"></g>
+      <g id="charG" transform="translate(72,96) scale(0.77)">
+        <path id="backHair" fill="url(#hairG)" stroke="#d8d4c0" stroke-width="2"
+          d="M310 170 C 215 170 160 250 152 370 C 145 490 142 620 150 745 C 155 812 168 845 185 856 L 435 856 C 452 845 465 812 470 745 C 478 620 475 490 468 370 C 460 250 405 170 310 170 Z"/>
+        <path d="M205 300 C 212 460 206 620 218 780" stroke="#ffffff" stroke-width="12" opacity=".3" fill="none"/>
+        <path d="M420 310 C 414 470 422 630 410 790" stroke="#ffffff" stroke-width="10" opacity=".25" fill="none"/>
+        <g id="armL" transform="translate(214,696)">
+          <g id="upL">
+            <path d="M0 0 C -16 45 -18 100 -12 155 L 24 155 C 28 105 26 50 15 4 Z" fill="#d98a5c"/>
+            <g id="foL" transform="translate(6,152)">
+              <path d="M-17 0 L 21 0 L 19 130 C 19 150 11 162 2 162 C -9 162 -15 150 -15 130 Z" fill="#f5f4ea"/>
+              <path d="M-17 28 L 21 28 L 21 40 L -17 40 Z" fill="#e8854f"/>
+              <path d="M-17 52 L 21 52 L 21 62 L -17 62 Z" fill="#e8854f"/>
+              <path d="M-13 130 C -13 162 -9 180 2 180 C 13 180 17 162 17 130 L 17 116 L -13 116 Z" fill="#d98a5c"/>
+            </g>
+          </g>
+        </g>
+        <g id="armR" transform="translate(406,696)">
+          <g id="upR">
+            <path d="M0 0 C 16 45 18 100 12 155 L -24 155 C -28 105 -26 50 -15 4 Z" fill="#d98a5c"/>
+            <g id="foR" transform="translate(-6,152)">
+              <path d="M-21 0 L 17 0 L 15 130 C 15 150 9 162 -2 162 C -11 162 -19 150 -19 130 Z" fill="#f5f4ea"/>
+              <path d="M-21 28 L 17 28 L 17 40 L -21 40 Z" fill="#e8854f"/>
+              <path d="M-21 52 L 17 52 L 17 62 L -21 62 Z" fill="#e8854f"/>
+              <path d="M-17 130 C -17 162 -13 180 -2 180 C 9 180 13 162 13 130 L 13 116 L -17 116 Z" fill="#d98a5c"/>
+            </g>
+          </g>
+        </g>
+        <g id="bodyG">
+          <path id="torso" d="M310 618 C 232 620 188 652 176 712 C 168 760 166 810 168 860 L 452 860 C 454 810 452 760 444 712 C 432 652 388 620 310 618 Z" fill="#f5f4ea"/>
+          <path d="M310 640 L 310 860" stroke="#dcd9c6" stroke-width="4"/>
+          <path d="M272 626 L 300 672 L 310 646 L 320 672 L 348 626 C 330 618 290 618 272 626 Z" fill="#f5f4ea" stroke="#d8d4c0" stroke-width="2.5"/>
+          <path d="M310 700 L 322 718 L 310 736 L 298 718 Z" fill="#f1d78c" stroke="#c9a44e" stroke-width="2.5"/>
+          <path d="M310 707 L 317 718 L 310 729 L 303 718 Z" fill="#f7e5ae"/>
+          <path d="M170 826 L 450 826" stroke="#f1d78c" stroke-width="5"/>
+          <path d="M170 844 L 450 844" stroke="#f1d78c" stroke-width="3"/>
+        </g>
+        <path id="neck" d="M293 552 L 293 606 C 293 618 327 618 327 606 L 327 552 Z" fill="#cf7f4e"/>
+        <g id="headG">
+          <path id="face" d="M310 240 C 238 240 208 305 212 380 C 216 455 248 515 284 540 C 297 549 306 552 310 552 C 314 552 323 549 336 540 C 372 515 404 455 408 380 C 412 305 382 240 310 240 Z" fill="#e09166"/>
+          <g id="eyeL">
+            <ellipse cx="262" cy="420" rx="30" ry="26" fill="#fff"/>
+            <g clip-path="url(#eyeLClip)">
+              <circle class="iris" cx="262" cy="422" r="19" fill="#e08840"/>
+              <circle class="pupil" cx="262" cy="422" r="8" fill="#2a1a10"/>
+              <circle class="hl" cx="255" cy="414" r="5" fill="#fff"/>
+              <circle class="hl2" cx="269" cy="428" r="2.2" fill="#ffd9a0"/>
+              <rect id="lidL" x="230" y="392" width="64" height="0" fill="#e09166"/>
+            </g>
+            <path id="lashL" d="M231 414 C 241 392 283 390 294 412" stroke="#3a2a20" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <g id="eyeR">
+            <ellipse cx="358" cy="420" rx="30" ry="26" fill="#fff"/>
+            <g clip-path="url(#eyeRClip)">
+              <circle class="iris" cx="358" cy="422" r="19" fill="#e08840"/>
+              <circle class="pupil" cx="358" cy="422" r="8" fill="#2a1a10"/>
+              <circle class="hl" cx="351" cy="414" r="5" fill="#fff"/>
+              <circle class="hl2" cx="365" cy="428" r="2.2" fill="#ffd9a0"/>
+              <rect id="lidR" x="326" y="392" width="64" height="0" fill="#e09166"/>
+            </g>
+            <path id="lashR" d="M326 412 C 337 390 379 392 389 414" stroke="#3a2a20" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <path id="browL" d="M234 384 C 246 372 278 370 292 378" stroke="#c9c4ae" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path id="browR" d="M328 378 C 342 370 374 372 386 384" stroke="#c9c4ae" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path id="nose" d="M310 462 C 308 470 307 474 310 477" stroke="#c97a52" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <g id="mouthG"></g>
+          <ellipse id="blushL" cx="240" cy="470" rx="18" ry="10" fill="#d96a4a" opacity="0"/>
+          <ellipse id="blushR" cx="380" cy="470" rx="18" ry="10" fill="#d96a4a" opacity="0"/>
+          <g id="tearL" opacity="0"><path d="M248 446 C 244 458 242 466 248 470 C 254 466 252 458 248 446 Z" fill="#bfe3ff"/></g>
+          <g id="tearR" opacity="0"><path d="M372 446 C 368 458 366 466 372 470 C 378 466 376 458 372 446 Z" fill="#bfe3ff"/></g>
+          <g id="sweat" opacity="0"><path d="M404 330 C 398 346 396 356 404 361 C 412 356 410 346 404 330 Z" fill="#cfe9ff" stroke="#9fc8e8" stroke-width="1.5"/></g>
+          <path id="bangs" fill="url(#hairG)" stroke="#d8d4c0" stroke-width="2"
+            d="M310 205 C 235 205 198 268 196 340 C 195 358 199 372 206 384 L 230 352 L 262 366 L 292 344 L 310 358 L 328 344 L 358 366 L 390 352 L 414 384 C 421 372 425 358 424 340 C 422 268 385 205 310 205 Z"/>
+          <path id="lockL" fill="url(#hairG)" stroke="#d8d4c0" stroke-width="2"
+            d="M242 330 C 222 380 216 480 222 590 C 226 660 234 706 244 730 C 253 736 262 734 266 724 C 258 655 256 550 260 460 C 263 400 258 360 242 330 Z"/>
+          <path id="lockR" fill="url(#hairG)" stroke="#d8d4c0" stroke-width="2"
+            d="M378 330 C 398 380 404 480 398 590 C 394 660 386 706 376 730 C 367 736 358 734 354 724 C 362 655 364 550 360 460 C 357 400 362 360 378 330 Z"/>
+        </g>
+      </g>
+    </svg>
+
+    <div id="emobox">
+      <div class="lab">EMOTION</div>
+      <div class="row"><span class="dot" id="emodot"></span><span class="nm" id="emonm">calm</span><span class="pc" id="emopc">0%</span></div>
+      <div class="tr"><div class="fl" id="emofl"></div></div>
+    </div>
+    <div id="chat">
+      <input id="msg" placeholder="say something to her..." autocomplete="off">
+      <button id="send">Send</button>
+    </div>
+  </div>
+  <div id="right">
+    <div class="hd"><span class="b">JEV · SHAPES</span> · jev-latest · 10 regions · <span id="reqct">0</span> requests</div>
+    <div id="quoted">"say something and watch the ten regions compose"</div>
+    <div class="cf">COMPOSED FACE — 9 blendshapes <span>· amp <span id="ampv">1</span> · <span id="phase">idle</span></span></div>
+    <div id="blend"></div>
+    <div id="tele"></div>
+    <div id="regions"></div>
+    <div id="foot">local replica after the pedro_computer / typesafe Jev reference · ten region decisions per message, composed live · no preset expressions, no network calls · director fully deterministic</div>
+  </div>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)/4294967295}
+const KW={
+ glad:["got the job","they said yes","hired","accepted","won ","passed","promoted","love this","amazing","thank you","thanks","yes!","nailed","free food","payday","vacation"],
+ funny:["wrong name","called my","autocorrect","typo","awkward","oops","tripped","fart","butt dial","replied all","mute yourself","zoom","embarrassing"],
+ feels:["sorry for your","died","funeral","sick","hospital","miss him","miss her","lost my dog","lost my cat","sad","crying","heart broke","grief"],
+ indignant:["took my idea","stole","unfair","fired me","blamed me","lied to","betrayed","screwed me","not right","furious","rage"],
+ thrown:["spider","suddenly","jumped out","plot twist","wait what","scared","creepy","behind you","shock","earthquake","ghost","snake"],
+ bashful:["proposed","crush","confess","asked me out","kiss","blushing","shy","date tonight","marry"]
+};
+const REACTIONS=["nothing","funny","glad for him","feels for him","indignant","thrown"];
+function analyze(text){
+  const t=text.toLowerCase();const sc={glad:0,funny:0,feels:0,indignant:0,thrown:0,bashful:0};
+  for(const k in KW)for(const w of KW[k])if(t.includes(w))sc[k]+=w.length/6+0.6;
+  let best="nothing",bs=0.35;
+  for(const k in sc)if(sc[k]>bs){bs=sc[k];best=k}
+  const conf=Math.min(0.99,0.42+bs*0.18);
+  const P={
+   nothing:{mouth:1.6,jaw:0.2,lids:3.4,brow:1.8,eyes:2.2,cheek:0,gaze:1,pers:1,amp:0.15,body:0,hold:3},
+   glad:{mouth:4.2,jaw:1.6,lids:4.1,brow:3.4,eyes:3.4,cheek:1.2,gaze:1,pers:2,amp:1,body:5,hold:3.9},
+   funny:{mouth:3.4,jaw:1.1,lids:3.9,brow:3.1,eyes:3.1,cheek:1,gaze:2,pers:1.6,amp:0.8,body:1,hold:3.2},
+   feels:{mouth:0.7,jaw:0.4,lids:2.4,brow:0.8,eyes:2.8,cheek:0.4,gaze:3.6,pers:2.7,amp:0.6,body:9,hold:4.5},
+   indignant:{mouth:0.9,jaw:0.6,lids:3.2,brow:0.6,eyes:1.6,cheek:0.7,gaze:1,pers:2.4,amp:0.7,body:1,hold:3.8},
+   thrown:{mouth:2.4,jaw:2.6,lids:4.8,brow:3.9,eyes:1.2,cheek:0.4,gaze:2,pers:1,amp:0.9,body:7,hold:1.9},
+   bashful:{mouth:2.6,jaw:0.6,lids:2.9,brow:2.4,eyes:3.4,cheek:2.6,gaze:3.2,pers:2.2,amp:0.8,body:6,hold:3.6}
+  };
+  return {reaction:best,conf,S:P[best]};
+}
+const EMO={nothing:["calm","#8fa8a0"],glad:["happy","#4caf7d"],funny:["playful","#e8c34a"],feels:["sad","#5b8dd9"],indignant:["angry","#e0574f"],thrown:["surprised","#4aa8e0"],bashful:["love","#e87ba0"]};
+const SKY={
+ nothing:["#8fb6dd","#dbe9f4"],glad:["#7db4e8","#d9ecf9"],funny:["#82b4e6","#e2eef8"],
+ feels:["#5d7086","#9fb2c4"],indignant:["#565d78","#c98a5e"],thrown:["#6f9fd0","#cfe0f0"],bashful:["#7db4e8","#f7d9e8"]};
+const BSSETS={
+ glad:[["mouth · fun",s=>Math.max(0,s.mouth-2.6)/2.4],["mouth · joy",s=>Math.max(0,s.mouth-1.8)/3.2],["mouth · large",s=>s.jaw/3],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · joy",s=>Math.max(0,s.brow-2.2)/1.8],["brow · surprised",s=>Math.max(0,s.brow-3)],["eyes · fun",s=>Math.max(0,s.eyes-2.6)/1.4]],
+ funny:[["mouth · fun",s=>Math.max(0,s.mouth-2.6)/2.4],["mouth · joy",s=>Math.max(0,s.mouth-1.8)/3.2],["mouth · large",s=>s.jaw/3],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · joy",s=>Math.max(0,s.brow-2.2)/1.8],["brow · surprised",s=>Math.max(0,s.brow-3)],["eyes · fun",s=>Math.max(0,s.eyes-2.6)/1.4]],
+ indignant:[["mouth · sorrow",s=>Math.max(0,1.6-s.mouth)/1.6],["mouth · down",s=>Math.max(0,2-s.mouth)/2.4],["mouth · small",s=>Math.max(0,1.4-s.jaw)/1.4],["mouth · close",s=>Math.max(0,1-s.jaw)],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · angry",s=>Math.max(0,1.8-s.brow)/1.8],["brow · sorrow",s=>Math.max(0,1.2-s.brow)/1.2]],
+ feels:[["mouth · sorrow",s=>Math.max(0,1.6-s.mouth)/1.6],["mouth · down",s=>Math.max(0,2-s.mouth)/2.4],["mouth · small",s=>Math.max(0,1.4-s.jaw)/1.4],["mouth · close",s=>Math.max(0,1-s.jaw)],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · angry",s=>Math.max(0,1.8-s.brow)/1.8],["brow · sorrow",s=>Math.max(0,1.2-s.brow)/1.2]],
+ thrown:[["mouth · fun",s=>Math.max(0,s.mouth-2.6)/2.4],["mouth · joy",s=>Math.max(0,s.mouth-1.8)/3.2],["mouth · large",s=>s.jaw/3],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · joy",s=>Math.max(0,s.brow-2.2)/1.8],["brow · surprised",s=>Math.max(0,s.brow-3)],["eyes · fun",s=>Math.max(0,s.eyes-2.6)/1.4]],
+ bashful:[["mouth · fun",s=>Math.max(0,s.mouth-2.6)/2.4],["mouth · joy",s=>Math.max(0,s.mouth-1.8)/3.2],["mouth · large",s=>s.jaw/3],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · joy",s=>Math.max(0,s.brow-2.2)/1.8],["brow · surprised",s=>Math.max(0,s.brow-3)],["eyes · fun",s=>Math.max(0,s.eyes-2.6)/1.4]],
+ nothing:[["mouth · fun",s=>Math.max(0,s.mouth-2.6)/2.4],["mouth · joy",s=>Math.max(0,s.mouth-1.8)/3.2],["mouth · large",s=>s.jaw/3],["mouth · A",s=>Math.max(0,s.jaw-1)/2],["eyes · surprised",s=>Math.max(0,s.lids-3.6)/1.4],["eyes · spread",s=>Math.max(0,s.lids-4.2)/0.8],["brow · joy",s=>Math.max(0,s.brow-2.2)/1.8],["brow · surprised",s=>Math.max(0,s.brow-3)],["eyes · fun",s=>Math.max(0,s.eyes-2.6)/1.4]]
+};
+const S={mouth:1.6,jaw:0.2,lids:3.4,brow:1.8,eyes:2.2,cheek:0,gaze:1,pers:1,amp:0.15,
+ mouthT:1.6,jawT:0.2,lidsT:3.4,browT:1.8,eyesT:2.2,cheekT:0,gazeT:1,persT:1,
+ phase:"idle",phaseT:0,hold:3,body:0,bodyAmp:0,bodyP:0,cat:"nothing",p:0,
+ blink:0,blinkT:2.5+Math.random()*2,gazeX:0,gazeY:0,gazeTX:0,gazeTY:0,driftT:2,away:0,
+ breath:0,tear:0,sweat:0,cur:"nothing",conf:0};
+let requests=0;
+const BODIES=["still","nod","shrug","wave","point","cheer","bashful","startle","hips","cry"];
+const POSES={
+ 0:{aL:0,aR:0,eL:0,eR:0,tilt:0},1:{aL:0,aR:0,eL:0,eR:0,tilt:2},2:{aL:15,aR:-15,eL:-8,eR:8,tilt:0},
+ 3:{aL:0,aR:-135,eL:0,eR:20,tilt:-3},4:{aL:0,aR:-80,eL:0,eR:0,tilt:0},5:{aL:135,aR:-135,eL:-15,eR:15,tilt:-4},
+ 6:{aL:45,aR:-45,eL:-80,eR:80,tilt:6},7:{aL:28,aR:-28,eL:-20,eR:20,tilt:0},8:{aL:0,aR:0,eL:0,eR:0,tilt:0},
+ 9:{aL:50,aR:-50,eL:-95,eR:95,tilt:10}};
+const pose={aL:0,aR:0,eL:0,eR:0,tilt:0};
+function compose(text){
+  const plan=analyze(text);
+  S.mouthT=plan.S.mouth;S.jawT=plan.S.jaw;S.lidsT=plan.S.lids;S.browT=plan.S.brow;
+  S.eyesT=plan.S.eyes;S.cheekT=plan.S.cheek;S.gazeT=plan.S.gaze;S.persT=plan.S.pers;
+  S.cur=plan.reaction;S.conf=plan.conf;S.hold=plan.S.hold;S.body=plan.S.body;
+  S.amp=plan.S.amp;S.phase="rise";S.phaseT=0;
+  S.tear=plan.reaction==="feels"?1:0;S.sweat=plan.reaction==="thrown"?1:0;
+  requests++;$("reqct").textContent=requests;
+  $("quoted").textContent='"'+text+'"';
+  const e=EMO[plan.reaction];
+  $("emonm").textContent=e[0];$("emodot").style.background=e[1];$("emofl").style.background=e[1];
+  $("emopc").textContent=Math.round(plan.conf*100)+"%";$("emofl").style.width=Math.round(plan.conf*100)+"%";
+  $("skyA").setAttribute("stop-color",SKY[plan.reaction][0]);
+  $("skyB").setAttribute("stop-color",SKY[plan.reaction][1]);
+  buildBlend(plan.reaction);
+}
+// ---------- panel ----------
+const CATS={
+ reaction:REACTIONS,
+ mouth:["pulled down","pressed flat","at rest","corners up","open smile","laughing"],
+ jaw:["closed","parted","open","dropped"],
+ eyelids:["shut","creased","narrowed","normal","wider","staring"],
+ brow:["knit down","pinched up","level","lifted","shot up"],
+ eyes:["hard","flat","neutral","softened","creased warm"],
+ cheek:["normal","a touch","flushed","bright red"],
+ gaze:["locked on","holds","drifts","looks away","eyes down"],
+ persistence:["gone at once","a moment","stays","settles in"],
+ body:BODIES};
+const DOTC=["#e8c34a","#e8854f","#7cb3e8","#5fbf77","#c98ae0","#e0e4e8"];
+const REGION_DEFS=[
+ ["reaction",()=>"p "+S.conf.toFixed(2),()=>REACTIONS[S.cur==="nothing"?0:S.cur==="funny"?1:S.cur==="glad"?2:S.cur==="feels"?3:S.cur==="indignant"?4:5]],
+ ["mouth",()=>S.mouth.toFixed(2)+" <span class='ro'>of 5</span>",()=>CATS.mouth[Math.round(Math.min(5,Math.max(0,S.mouth)))]],
+ ["jaw",()=>S.jaw.toFixed(2)+" <span class='ro'>of 3</span>",()=>CATS.jaw[Math.round(Math.min(3,Math.max(0,S.jaw)))]],
+ ["eyelids",()=>S.lids.toFixed(1)+" <span class='ro'>of 5</span>",()=>CATS.eyelids[Math.round(Math.min(5,Math.max(0,S.lids)))]],
+ ["brow",()=>S.brow.toFixed(2)+" <span class='ro'>of 4</span>",()=>CATS.brow[Math.round(Math.min(4,Math.max(0,S.brow)))]],
+ ["eyes",()=>S.eyes.toFixed(2)+" <span class='ro'>of 4</span>",()=>CATS.eyes[Math.round(Math.min(4,Math.max(0,S.eyes)))]],
+ ["cheek",()=>S.cheek.toFixed(2)+" <span class='ro'>of 3</span>",()=>CATS.cheek[Math.round(Math.min(3,Math.max(0,S.cheek)))]],
+ ["gaze",()=>S.gaze.toFixed(2)+" <span class='ro'>of 4</span>",()=>CATS.gaze[Math.round(Math.min(4,Math.max(0,S.gaze)))]],
+ ["persistence",()=>S.pers.toFixed(2)+" <span class='ro'>of 3</span>",()=>CATS.persistence[Math.round(Math.min(3,Math.max(0,S.pers)))]],
+ ["body",()=>"p "+(0.4+hash(S.cur)*0.55).toFixed(2),()=>BODIES[S.body]]];
+let BS=BSSETS.nothing;
+function buildBlend(r){
+  BS=BSSETS[r]||BSSETS.nothing;
+  const el=$("blend");el.innerHTML="";
+  BS.forEach(b=>{const r=document.createElement("div");r.className="bsrow";
+   r.innerHTML=`<span class="nm">${b[0]}</span><span class="tr"><span class="fl"></span></span><span class="vv">0</span>`;el.appendChild(r)});
+}
+function updateBars(){
+  const rows=$("blend").children;
+  BS.forEach((b,i)=>{const v=Math.min(1,Math.max(0,b[1](S)*S.amp));
+   rows[i].querySelector(".fl").style.width=(v*100)+"%";
+   rows[i].querySelector(".vv").textContent=v.toFixed(2)});
+}
+function buildRegions(){
+  const el=$("regions");el.innerHTML="";
+  REGION_DEFS.forEach((d,ri)=>{
+   const row=document.createElement("div");row.className="rrow";
+   row.innerHTML=`<span class="rn">${d[0]}</span><span class="rv">${d[1]()}</span>`;el.appendChild(row);
+   const cats=document.createElement("div");cats.className="cats";
+   CATS[d[0]].forEach((c,ci)=>{const s=document.createElement("span");
+    s.innerHTML=`<i style="background:${DOTC[ci%DOTC.length]}"></i>${c}`;cats.appendChild(s)});
+   el.appendChild(cats)});
+}
+function updateRegions(){
+  const kids=$("regions").children;
+  REGION_DEFS.forEach((d,i)=>{
+   const row=kids[i*2];if(!row)return;
+   row.querySelector(".rv").innerHTML=d[1]();
+   const cats=kids[i*2+1];const on=d[2]();
+   for(const s of cats.children)s.className=(s.textContent===on)?"on":"";
+  });
+  const av=S.away?0.3+hash($("quoted").textContent)*0.4:0;
+  $("tele").textContent=`blush ${(Math.min(1,S.cheek/2.4)).toFixed(2)} · gaze contact ${(1-av).toFixed(2)} aversion ${av.toFixed(2)} drop ${(S.away*0.3).toFixed(2)}m · rise 0.19s hold ${S.hold.toFixed(1)}s fall 0.9s · body ${BODIES[S.body]}`;
+  $("ampv").textContent=S.amp.toFixed(S.amp<1?2:0).replace(/0+$/,"").replace(/\.$/,"")||"0";
+  $("phase").textContent=S.phase;
+}
+// ---------- face rendering ----------
+function renderFace(){
+  // lids: 0 shut .. 5 wide
+  const lidH=Math.max(0,(3.6-S.lids))*9 + (S.blink>0.7?26:0);
+  $("lidL").setAttribute("height",lidH);$("lidR").setAttribute("height",lidH);
+  // brows: 0 knit .. 4 shot up
+  const by=(S.brow-1.8)*5, bl=(1.8-S.brow)*8;
+  $("browL").setAttribute("transform",`translate(0,${-by}) rotate(${bl} 262 380)`);
+  $("browR").setAttribute("transform",`translate(0,${-by}) rotate(${-bl} 358 380)`);
+  // gaze
+  const gx=S.gazeX+ (S.gaze>2.4? (S.gaze>3.4? 8: 6):0), gy=S.gazeY+(S.gaze>2.8?4:0);
+  for(const g of document.querySelectorAll("#eyeL .iris,#eyeL .pupil,#eyeL .hl,#eyeL .hl2,#eyeR .iris,#eyeR .pupil,#eyeR .hl,#eyeR .hl2")){
+    const bx=+g.getAttribute("data-x")||+g.getAttribute("cx"), byy=+g.getAttribute("data-y")||+g.getAttribute("cy");
+    g.setAttribute("data-x",bx);g.setAttribute("data-y",byy);
+    g.setAttribute("cx",bx+gx);g.setAttribute("cy",byy+gy);
+  }
+  // mouth
+  const m=S.mouth, j=S.jaw;
+  const open=Math.min(1,j/2.6), curve=(m-1.6)/3.4, w=32+m*3.6;
+  const mx=310, my=505+j*3;
+  let d,fill="#7a3b2e";
+  if(open<0.12){
+    const cy=my-curve*14;
+    d=`M ${mx-w} ${cy} Q ${mx} ${cy+curve*26} ${mx+w} ${cy}`;
+    if(curve<0){d=`M ${mx-w*0.8} ${my+6} Q ${mx} ${my-8} ${mx+w*0.8} ${my+6}`}
+    $("mouthG").innerHTML=`<path d="${d}" stroke="#7a3b2e" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+  } else {
+    const top=my-curve*10-open*4, bot=my+open*20+curve*6;
+    d=`M ${mx-w} ${top} Q ${mx} ${top+curve*18} ${mx+w} ${top} Q ${mx+ w*0.7} ${bot} ${mx} ${bot} Q ${mx-w*0.7} ${bot} ${mx-w} ${top} Z`;
+    let inner="";
+    if(open>0.3) inner=`<path d="M ${mx-w*0.82} ${top+2} Q ${mx} ${top+curve*16} ${mx+w*0.82} ${top+2} L ${mx+w*0.7} ${top+8+open*3} Q ${mx} ${top+10+curve*14} ${mx-w*0.7} ${top+8+open*3} Z" fill="#fff"/>`;
+    if(open>0.55) inner+=`<ellipse cx="${mx}" cy="${bot-6}" rx="${w*0.4}" ry="6" fill="#c96a5a"/>`;
+    $("mouthG").innerHTML=`<path d="${d}" fill="${fill}" stroke="#6a2f24" stroke-width="2"/>${inner}`;
+  }
+  // blush
+  const b=Math.min(1,S.cheek/2.6)*0.55;
+  $("blushL").setAttribute("opacity",b);$("blushR").setAttribute("opacity",b);
+  // tears / sweat
+  const ty=(S.tear&&S.phase!=="idle")?1:0;
+  $("tearL").setAttribute("opacity",ty*(0.6+0.4*Math.sin(performance.now()/300)));
+  $("tearR").setAttribute("opacity",ty*(0.6+0.4*Math.cos(performance.now()/300)));
+  $("sweat").setAttribute("opacity",S.sweat&&S.phase!=="idle"?0.95:0);
+}
+// ---------- body ----------
+function renderBody(dt,t){
+  const tgt=POSES[S.body]||POSES[0];
+  const k=Math.min(1,dt*4);
+  for(const key of ["aL","aR","eL","eR","tilt"]) pose[key]+=(tgt[key]-pose[key])*k;
+  let eR=pose.eR, extraY=0, rotZ=0;
+  if(S.body===3&&S.phase!=="idle") eR+=Math.sin(t*7)*18;
+  if(S.body===5&&S.phase!=="idle") extraY=Math.abs(Math.sin(t*3.2))*-16;
+  if(S.body===8&&S.phase!=="idle") rotZ=Math.sin(t*2.2)*3;
+  if(S.body===1&&S.phase!=="idle") extraY=Math.sin(t*2.4)*5;
+  const breathe=Math.sin(t*1.4)*2;
+  $("armL").setAttribute("transform",`translate(214,${696+extraY}) rotate(${pose.aL} 0 0)`);
+  $("foL").setAttribute("transform",`translate(6,152) rotate(${pose.eL} 0 0)`);
+  $("armR").setAttribute("transform",`translate(406,${696+extraY}) rotate(${pose.aR} 0 0)`);
+  $("foR").setAttribute("transform",`translate(-6,152) rotate(${eR} 0 0)`);
+  $("bodyG").setAttribute("transform",`translate(0,${breathe+extraY*0.6})`);
+  $("headG").setAttribute("transform",`translate(${rotZ*2},${breathe*0.8+extraY}) rotate(${pose.tilt+rotZ} 310 420)`);
+}
+// ---------- tick ----------
+const lerp=(a,b,k)=>a+(b-a)*k;
+function tick(dt,t){
+  // envelope
+  S.phaseT+=dt;
+  let env=1;
+  if(S.phase==="rise"){env=Math.min(1,S.phaseT/0.19);if(env>=1){S.phase="hold";S.phaseT=0}}
+  else if(S.phase==="hold"){if(S.phaseT>S.hold){S.phase="fall";S.phaseT=0}}
+  else if(S.phase==="fall"){env=Math.max(0,1-S.phaseT/0.9);if(env<=0){S.phase="idle";S.phaseT=0;S.cur="nothing";S.tear=0;S.sweat=0;
+    S.mouthT=1.6;S.jawT=0.2;S.lidsT=3.4;S.browT=1.8;S.eyesT=2.2;S.cheekT=0;S.gazeT=1;S.persT=1;S.body=0;S.amp=0.15;
+    $("emonm").textContent="calm";$("emodot").style.background="#8fa8a0";$("emofl").style.background="#8fa8a0";$("emopc").textContent="0%";$("emofl").style.width="0%";
+    $("skyA").setAttribute("stop-color",SKY.nothing[0]);$("skyB").setAttribute("stop-color",SKY.nothing[1]);}}
+  else env=0;
+  const k=Math.min(1,dt*7);
+  S.mouth=lerp(S.mouth,S.mouthT,k);S.jaw=lerp(S.jaw,S.jawT,k);S.lids=lerp(S.lids,S.lidsT,k);
+  S.brow=lerp(S.brow,S.browT,k);S.eyes=lerp(S.eyes,S.eyesT,k);S.cheek=lerp(S.cheek,S.cheekT,k);
+  S.gaze=lerp(S.gaze,S.gazeT,k);S.pers=lerp(S.pers,S.persT,k);
+  // blink
+  S.blinkT-=dt;
+  if(S.blinkT<0){S.blink=1;S.blinkT=2.2+Math.random()*2.6}
+  S.blink=Math.max(0,S.blink-dt*6);
+  // gaze drift
+  S.driftT-=dt;
+  if(S.driftT<0){S.gazeTX=(Math.random()-0.5)*7;S.gazeTY=(Math.random()-0.5)*4;S.driftT=1.6+Math.random()*2.4}
+  S.gazeX=lerp(S.gazeX,S.gazeTX,Math.min(1,dt*3));S.gazeY=lerp(S.gazeY,S.gazeTY,Math.min(1,dt*3));
+  renderFace();renderBody(dt,t);
+  updateBars();updateRegions();
+}
+// ---------- io ----------
+const BEATS=["i got the job. they said yes","i called my new boss by the wrong name","she started signing her emails with the wrong name back","my boss took my idea and presented it as hers","a spider just walked across my keyboard","he proposed at the game last night","sorry for your loss. he was a good dog"];
+function fire(){const v=$("msg").value.trim();if(v){compose(v);$("msg").value=""}}
+$("send").onclick=fire;
+$("msg").addEventListener("keydown",e=>{if(e.key==="Enter")fire()});
+// sparkles
+for(let i=0;i<10;i++){
+  const s=document.createElementNS("http://www.w3.org/2000/svg","path");
+  const x=40+Math.random()*560,y=40+Math.random()*700,z=4+Math.random()*7;
+  s.setAttribute("d",`M ${x} ${y-z} L ${x+z*0.28} ${y-z*0.28} L ${x+z} ${y} L ${x+z*0.28} ${y+z*0.28} L ${x} ${y+z} L ${x-z*0.28} ${y+z*0.28} L ${x-z} ${y} L ${x-z*0.28} ${y-z*0.28} Z`);
+  s.setAttribute("fill",i%3?"#ffd9a0":"#ffffff");s.setAttribute("opacity",0.5+Math.random()*0.5);
+  s.innerHTML=`<animate attributeName="opacity" values="${0.3+Math.random()*0.4};0.95;${0.3+Math.random()*0.4}" dur="${2+Math.random()*3}s" repeatCount="indefinite"/>`;
+  $("sparkles").appendChild(s);
+}
+buildBlend();buildRegions();
+const qp=new URLSearchParams(location.search);
+if(qp.has("beat")){const i=parseInt(qp.get("beat"))||0;compose(BEATS[i%BEATS.length]);S.phase="hold";S.phaseT=0.9}
+if(qp.has("loop")){let i=0;setInterval(()=>{compose(BEATS[i++%BEATS.length])},4200)}
+setInterval(()=>{
+  const now=performance.now();
+  const dt=Math.min(0.12,(now-(setInterval.last||now))/1000);setInterval.last=now;
+  tick(dt,now/1000);
+},40);
+</script>
+</body>
+</html>
